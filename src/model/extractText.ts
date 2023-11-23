@@ -14,21 +14,29 @@ import {
 } from '@azure/ai-form-recognizer';
 
 import * as dotenv from 'dotenv';
-dotenv.config();
+const envFilePath = 'azurets/.env';
+dotenv.config({ path: envFilePath });
 
 async function main() {
-  const endpoint = '';
+  const endpoint = process.env.FORM_RECOGNIZER_ENDPOINT;
+
   const credential = new AzureKeyCredential(
-    'https://eastus.api.cognitive.microsoft.com/',
+    process.env.FORM_RECOGNIZER_API_KEY,
   );
   const client = new DocumentAnalysisClient(endpoint, credential);
 
-  const modelId = 'model202311172';
+  const modelId = process.env.CUSTOM_MODEL_ID;
 
-  const poller = await client.beginAnalyzeDocumentFromUrl(
-    modelId,
-    'https://raw.githubusercontent.com/Azure/azure-sdk-for-js/main/sdk/formrecognizer/ai-form-recognizer/assets/receipt/contoso-receipt.png',
-  );
+  //   path
+  const fs = require('fs');
+  const path = 'azurets/src/public/image/';
+  const imageName = 'image.jpg';
+
+  const readStream = fs.createReadStream(path + imageName);
+
+  console.log(`Analyzing document using model ID ${modelId}...`);
+  
+  const poller = await client.beginAnalyzeDocument(modelId, readStream);
 
   const { documents } = await poller.pollUntilDone();
   const document = documents && documents[0];

@@ -21,12 +21,16 @@ async function main() {
 
 //   path
 const fs = require('fs');
-const path = 'azurets/src/public/imageimage.jpg';
+const path = 'azurets/src/public/image/';
+const imageName = 'image.jpg';
 
-const readStream = fs.createReadStream(path);
+const readStream = fs.createReadStream(path+imageName);
 // 
 
   const classifierId = process.env.CUSTOM_CLASSIFIER_ID ;
+
+  console.log(`Classifying document using classifier ID ${classifierId}...`);
+  
   const poller = await client.beginClassifyDocument(classifierId, readStream, {
     onProgress(state) {
       console.log(`status: ${state.status}`);
@@ -43,6 +47,7 @@ const readStream = fs.createReadStream(path);
     console.log(
       `Extracted a document with type '${document.docType}' on page ${document.boundingRegions?.[0].pageNumber} (confidence: ${document.confidence})`,
     );
+    return document.docType;
   }
 }
 
